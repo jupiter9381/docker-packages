@@ -1,0 +1,47 @@
+version: "3.7"
+
+services:
+
+  php:
+    container_name: nginx
+    build:  ./backend/
+    restart: always
+    environment:
+      - PUID=1000
+      - PGID=1000
+    volumes:
+      - ./backend:/var/www
+      - ./config/dev/nginx:/etc/nginx/conf.d
+    ports:
+      - 80:8000
+    depends_on:
+      - node
+
+  node:
+    container_name: nuxt
+    build:  ./frontend/
+    restart: always
+    command: sh -c "npm install && npm run start"
+    volumes:
+      - ./frontend:/app
+
+  mysql:
+    container_name: mysql
+    image: percona:8.0.15-5
+    restart: always
+    environment:
+      MYSQL_ROOT_HOST: wedo
+      MYSQL_ROOT_PASSWORD: wedo
+      MYSQL_DATABASE: wedo
+      MYSQL_USER: wedo
+      MYSQL_PASSWORD: wedo
+    volumes:
+      - ./config/dev/mysql:/etc/my.cnf.d
+    ports:
+      - 3306:3306
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
